@@ -1,301 +1,242 @@
-# FETaskBuilder - Task Board Application
+# TaskBoard API
 
-A modern React-based task management application with a clean kanban-style interface.
-
-## Overview
-
-FETaskBuilder is a frontend application built with React and Vite that provides an intuitive task board interface for managing tasks across different stages (Todo, InProgress, Done). It features optimistic UI updates, real-time activity tracking, and seamless API integration with a .NET backend.
-
-## Tech Stack
-- **Frontend**: React 18 with Vite
-- **HTTP Client**: Axios for API communication
-- **Styling**: Tailwind CSS with PostCSS
-- **State Management**: React hooks (custom hooks)
-- **Build Tool**: Vite
-- **Code Quality**: ESLint with React plugins
-
-## Features
-- **Task Board UI**: 3 columns (Todo, InProgress, Done)
-- **Task CRUD Operations**: Create, Edit, Delete (soft delete), Change status
-- **API Integration**: Service layer (taskService.js) connecting to .NET backend
-- **Optimistic UI Updates**: UI updates before API response with rollback on failure
-- **Activity Timeline**: Shows task activity history
-- **Error Handling**: Toast notifications for user feedback
-- **Loading States**: Loading spinners and empty states
-- **Responsive Design**: Works on desktop and mobile devices
-
-## Project Structure
-```
-/src
-  /components
-    - TaskCard.jsx
-    - TaskColumn.jsx
-    - CreateTaskForm.jsx
-    - ActivityTimeline.jsx
-    - Toast.jsx
-    - LoadingSpinner.jsx
-  /pages
-    - TaskBoard.jsx
-  /services
-    - taskService.js
-  /hooks
-    - useTasks.js
-    - useActivities.js
-    - useToast.js
-  - App.jsx
-  - main.jsx
-  - index.css
-```
+A production-style ASP.NET Core Web API for a Task Board application built with Clean Architecture principles.
 
 ## Setup Instructions
 
 ### Prerequisites
-- **Node.js**: Version 16.0.0 or higher
-- **npm**: Version 7.0.0 or higher (comes with Node.js)
-- **Backend API**: .NET API server running on configured port
 
-### Installation Steps
+- **.NET 7.0 SDK** or later
+- **SQL Server** (SQL Server Express, LocalDB, or full SQL Server)
+- **Visual Studio 2022** or **VS Code** with .NET extensions
 
-1. **Clone the repository** (if not already cloned):
+### Database Setup
+
+1. **Install SQL Server** if not already installed
+2. **Create a database** (optional - the app will create it automatically)
+3. **Update connection string** in `src/TaskBoard.API/appsettings.json`:
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=YOUR_SERVER_NAME;Database=TaskBoardDb;User Id=YOUR_USERNAME;Password=YOUR_PASSWORD;MultipleActiveResultSets=true;TrustServerCertificate=true"
+  }
+}
+```
+
+### Running the Application
+
+#### Option 1: Using Visual Studio
+1. Open `TaskBoard.sln` in Visual Studio
+2. Set `TaskBoard.API` as the startup project
+3. Press `F5` or click "Start Debugging"
+
+#### Option 2: Using Command Line
+1. Navigate to the API project directory:
+   ```bash
+   cd src/TaskBoard.API
+   ```
+
+2. Restore dependencies:
+   ```bash
+   dotnet restore
+   ```
+
+3. Run the application:
+   ```bash
+   dotnet run
+   ```
+
+4. The API will be available at `https://localhost:7000` and `http://localhost:5000`
+
+#### Option 3: Using Docker (if available)
 ```bash
-git clone <repository-url>
-cd FETaskBuilder
+docker build -t taskboard-api .
+docker run -p 5000:80 -p 7001:443 taskboard-api
 ```
 
-2. **Install dependencies**:
-```bash
-npm install
+### Database Migration
+
+The application automatically applies migrations on startup using `MigrateAsync()`. The database will be created with the required tables if it doesn't exist.
+
+### Testing the Setup
+
+1. Open `https://localhost:7000/swagger` in your browser
+2. You should see the Swagger UI with all available endpoints
+3. Try creating a task using the POST `/api/tasks` endpoint
+
+## API Details
+
+### Base URL
+- Development: `https://localhost:7000` or `http://localhost:5000`
+- Production: Configure as needed
+
+### Authentication
+Currently **not implemented** - all endpoints are publicly accessible.
+
+### Core Endpoints
+
+#### Task Management (`/api/tasks`)
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/api/tasks` | Get all tasks with filtering and pagination | No |
+| GET | `/api/tasks/{id}` | Get specific task with activities | No |
+| POST | `/api/tasks` | Create a new task | No |
+| PUT | `/api/tasks/{id}` | Update task (full update) | No |
+| PATCH | `/api/tasks/{id}/status` | Update task status only | No |
+| DELETE | `/api/tasks/{id}` | Soft delete a task | No |
+
+#### Activity Management (`/api/tasks/activities`)
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/api/tasks/activities` | Get all activities (placeholder) | No |
+| GET | `/api/tasks/activities/task/{taskId}` | Get activities for specific task | No |
+
+### Query Parameters
+
+#### For GET `/api/tasks`:
+- `status`: Filter by task status (`Todo`, `InProgress`, `Done`)
+- `page`: Page number (default: 1, min: 1)
+- `pageSize`: Items per page (default: 10, min: 1, max: 100)
+
+### Headers
+
+#### For Concurrency Control:
+- `If-Match`: Base64 encoded RowVersion for optimistic concurrency (required for PUT and PATCH operations)
+
+### Request/Response Formats
+
+#### Standard API Response:
+```json
+{
+  "success": true,
+  "data": {},
+  "message": "Operation completed successfully",
+  "errors": []
+}
 ```
 
-3. **Environment Setup**:
-   - Ensure your .NET backend API is running
-   - Verify the API endpoint configuration in `vite.config.js`
-   - Current configuration expects backend at `http://localhost:58183`
-
-4. **Start the development server**:
-```bash
-npm run dev
+#### Create Task Request:
+```json
+{
+  "title": "Sample Task",
+  "description": "Task description",
+  "priority": "Medium"
+}
 ```
 
-5. **Access the application**:
-   - Open your browser and navigate to `http://localhost:3000`
-   - The application will automatically proxy API requests to the backend
-
-### Backend Configuration
-
-The application is configured to connect to a .NET backend. To modify the backend connection:
-
-**Option 1: Update Vite Configuration**
-Edit `vite.config.js`:
-```javascript
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    port: 3000,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:YOUR_PORT', // Change this to your backend port
-        changeOrigin: true,
-        secure: false,
-      },
-    },
-  },
-})
+#### Update Task Request:
+```json
+{
+  "title": "Updated Task Title",
+  "description": "Updated description",
+  "priority": "High"
+}
 ```
 
-**Option 2: Environment Variables** (if implemented)
-Create a `.env` file in the root directory:
-```
-VITE_API_BASE_URL=http://localhost:YOUR_PORT
-```
-
-### Required Backend Endpoints
-
-The .NET backend should implement the following REST API endpoints:
-
-- `GET /api/tasks` - Retrieve all tasks
-- `POST /api/tasks` - Create a new task
-- `PUT /api/tasks/{id}` - Update an existing task
-- `DELETE /api/tasks/{id}` - Soft delete a task
-- `GET /api/tasks/activities` - Get task activity history
-
-### Build for Production
-
-```bash
-# Build the application
-npm run build
-
-# Preview the production build
-npm run preview
+#### Update Status Request:
+```json
+{
+  "status": "InProgress"
+}
 ```
 
-### API Error Handling
+### Status Transitions
 
-The service implements comprehensive error handling:
-
-- **Network Errors**: Connection issues, timeouts
-- **HTTP Errors**: 4xx/5xx status codes
-- **Validation Errors**: Bad request data
-- **Server Errors**: Internal server issues
-
-All errors are caught and propagated to the UI layer through custom hooks for user feedback.
-
-### Request/Response Flow
-
-1. **User Action** → Component Event Handler
-2. **Component** → Custom Hook (useTasks/useActivities)
-3. **Custom Hook** → Service Layer (taskService.js)
-4. **Service Layer** → Axios HTTP Request
-5. **Response** → Service Layer → Hook → Component → UI Update
-
-### Optimistic Updates
-
-The application implements optimistic UI updates:
-- UI updates immediately on user action
-- API call happens in background
-- Automatic rollback if API call fails
-- User notified via toast notifications
-
-## Features Implementation
-
-### Optimistic Updates
-- UI updates immediately when user performs actions
-- API calls happen in the background
-- Automatic rollback if API call fails
-- User feedback via toast notifications
+Valid status transitions enforced by the API:
+- ✅ Todo → InProgress
+- ✅ InProgress → Done
+- ✅ Done → InProgress (reopening)
+- ✅ InProgress → Todo (moving back)
+- ✅ Done → Todo (reopening)
 
 ### Error Handling
-- Network errors are caught and displayed
-- Validation errors are shown to users
-- Toast notifications for all user actions
 
-### Activity Timeline
-- Real-time activity tracking
-- Visual indicators for different action types
-- Timestamp formatting
-- Auto-refresh on task changes
+| Status Code | Description | Example Scenarios |
+|-------------|-------------|-------------------|
+| 200 | Success | Successful GET, POST, PUT, PATCH, DELETE |
+| 201 | Created | Task successfully created |
+| 400 | Bad Request | Validation errors, invalid status transitions |
+| 404 | Not Found | Task not found |
+| 412 | Precondition Failed | Concurrency conflicts |
+| 500 | Internal Server Error | Unexpected server errors |
 
-## Available Scripts
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
+### Concurrency Handling
+
+The API implements **optimistic concurrency** using RowVersion:
+1. GET a task to retrieve the current RowVersion
+2. Include the RowVersion in the `If-Match` header when updating
+3. Server validates RowVersion before applying changes
+4. Returns 412 status if a conflict occurs
 
 ## Design Decisions
 
-### Architecture Patterns
+### Architecture
+- **Clean Architecture**: Separated concerns into Domain, Application, Infrastructure, and API layers
+- **SOLID Principles**: Dependency injection, interface segregation, single responsibility
+- **Repository Pattern**: Abstract data access with testable interfaces
 
-#### 1. **Clean Architecture with Separation of Concerns**
-- **Components**: Pure UI components focused on presentation
-- **Hooks**: Business logic and state management
-- **Services**: API communication and data transformation
-- **Utils**: Helper functions and utilities
+### Technology Stack
+- **.NET 7.0**: Latest stable framework with performance improvements
+- **Entity Framework Core**: ORM with change tracking and migrations
+- **SQL Server**: Robust relational database with ACID compliance
+- **AutoMapper**: Object-to-object mapping for DTOs
+- **Swagger/OpenAPI**: Interactive API documentation
 
-This separation ensures:
-- Testability of individual layers
-- Reusability of components and hooks
-- Maintainability and scalability
-- Clear data flow and dependencies
+### Data Design
+- **Soft Delete**: Tasks are marked as deleted rather than physically removed
+- **RowVersion**: Timestamp-based concurrency control
+- **Activity Logging**: Automatic audit trail for all task operations
+- **Status Validation**: Business rules enforced at service layer
 
-#### 2. **Custom Hooks for State Management**
-Instead of Redux/Context API, we chose custom hooks because:
-- **Simplicity**: Less boilerplate for this application size
-- **Performance**: Targeted re-renders only when needed
-- **Encapsulation**: Logic co-located with related state
-- **Testability**: Easy to unit test hooks in isolation
+### API Design
+- **RESTful Principles**: Standard HTTP methods and status codes
+- **Consistent Response Format**: Standardized API response wrapper
+- **Pagination**: Prevents large result sets and improves performance
+- **Filtering**: Query parameters for data filtering
+- **Global Exception Handling**: Centralized error processing
 
-Key hooks:
-- `useTasks()`: Task CRUD operations and optimistic updates
-- `useActivities()`: Activity timeline management
-- `useToast()`: Toast notification system
+### Security Considerations
+- **Input Validation**: Model validation and custom business rules
+- **SQL Injection Protection**: Parameterized queries via EF Core
+- **CORS Configuration**: Configurable cross-origin resource sharing
+- **HTTPS Ready**: SSL/TLS configuration for production
 
-#### 3. **Optimistic UI Updates**
-Decision to implement optimistic updates for better UX:
-- **Immediate Feedback**: Users see changes instantly
-- **Perceived Performance**: Application feels faster
-- **Error Recovery**: Automatic rollback on API failures
-- **User Confidence**: Clear success/error notifications
+### Performance Optimizations
+- **Async/Await**: Non-blocking I/O operations throughout
+- **Efficient Queries**: EF Core query optimization and projection
+- **Pagination**: Limits data transfer for large datasets
+- **Connection Pooling**: Database connection management
 
-#### 4. **Service Layer Pattern**
-Centralized API service (`taskService.js`) provides:
-- **Single Source of Truth**: All API calls in one place
-- **Consistent Error Handling**: Unified error management
-- **Request/Response Interceptors**: Common logic for all requests
-- **Easy Mocking**: Simplified testing and development
-
-#### 5. **Component Composition Strategy**
-- **TaskCard**: Reusable card component for individual tasks
-- **TaskColumn**: Column container with drag-and-drop preparation
-- **CreateTaskForm**: Modal form for task creation
-- **ActivityTimeline**: Separate concern for activity tracking
-
-#### 6. **Styling Approach**
-- **Tailwind CSS**: Utility-first CSS framework
-- **Responsive Design**: Mobile-first approach
-- **Component-Scoped Styles**: Consistent design system
-- **Minimal Custom CSS**: Leverage Tailwind utilities
-
-#### 7. **Error Handling Strategy**
-- **Graceful Degradation**: App continues working with partial failures
-- **User-Friendly Messages**: Clear, actionable error messages
-- **Toast Notifications**: Non-intrusive error feedback
-- **Retry Logic**: Automatic retry for transient failures
-
-#### 8. **Performance Considerations**
-- **Lazy Loading**: Components loaded as needed
-- **Memoization**: React.memo for expensive components
-- **Debounced Search**: Prevent excessive API calls
-- **Efficient Re-renders**: Optimized dependency arrays
-
-### Technology Choices
-
-#### React with Vite
-- **Vite**: Fast development server and builds
-- **React 18**: Latest features and optimizations
-- **JSX**: Component-based architecture
-
-#### Axios over Fetch
-- **Better Error Handling**: Automatic error rejection
-- **Request/Response Interceptors**: Common logic
-- **JSON Transformation**: Automatic parsing
-- **Browser Support**: Wider compatibility
-
-#### Tailwind CSS
-- **Rapid Development**: Utility classes speed up styling
-- **Consistency**: Design system built-in
-- **Responsive**: Mobile-first utilities
-- **Maintainability**: No custom CSS to maintain
+## What is Completed / Not Completed
 
 ### Completed Features
 
 #### Core Functionality
-- **Task Board Interface**: Three-column kanban board (Todo, InProgress, Done)
-- **Task CRUD Operations**: 
-  - Create new tasks with title and description
-  - Edit existing task details
-  - Soft delete tasks (marked as deleted but preserved)
-  - Change task status between columns
-- **API Integration**: Full REST API communication with .NET backend
-- **Real-time Activity Timeline**: Track all task changes with timestamps
+- [x] **Task CRUD Operations**: Create, Read, Update, Delete tasks
+- [x] **Status Management**: Task status transitions with validation
+- [x] **Soft Delete**: Tasks are marked as deleted, not physically removed
+- [x] **Activity Logging**: Automatic audit trail for all operations
+- [x] **Concurrency Control**: Optimistic concurrency with RowVersion
 
-#### User Experience
-- **Optimistic UI Updates**: Immediate visual feedback with automatic rollback
-- **Toast Notification System**: Success/error messages for all user actions
-- **Loading States**: Spinners and empty states for better UX
-- **Responsive Design**: Mobile-friendly interface using Tailwind CSS
-- **Error Handling**: Comprehensive error catching and user feedback
+#### API Features
+- [x] **RESTful Endpoints**: Full CRUD API following REST principles
+- [x] **Pagination**: Server-side pagination for large datasets
+- [x] **Filtering**: Filter tasks by status
+- [x] **Global Exception Handling**: Centralized error processing
+- [x] **Input Validation**: Model validation and business rules
+- [x] **Swagger Documentation**: Interactive API documentation
+- [x] **AutoMapper Integration**: DTO mapping between layers
 
-#### Architecture & Code Quality
-- **Clean Architecture**: Separation of concerns (Components, Hooks, Services)
-- **Custom Hooks**: Reusable state management logic
-- **Service Layer**: Centralized API communication
-- **Component Reusability**: Modular, maintainable components
-- **Development Environment**: Vite-based fast development setup
+#### Data Layer
+- [x] **Entity Framework Core**: Database context and migrations
+- [x] **Repository Pattern**: Abstract data access layer
+- [x] **Clean Architecture**: Proper separation of concerns
+- [x] **Database Migrations**: Automatic schema updates
 
-### Partially Implemented
-
-#### Performance Optimizations
-- **Basic Memoization**: Some React.memo implementations
-
-#### Error Recovery
-- **Basic Retry Logic**: Simple error handling
+#### Development Tools
+- [x] **Sample HTTP Requests**: Comprehensive test requests file
+- [x] **Solution Structure**: Well-organized Visual Studio solution
+- [x] **Logging**: Structured logging throughout the application
