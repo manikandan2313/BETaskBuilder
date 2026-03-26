@@ -1,0 +1,12 @@
+e:\TaskBuilderBackend\backendTaskBuilder\src\TaskBoard.Domain\bin\Debug\net7.0\TaskBoard.Domain.deps.json
+e:\TaskBuilderBackend\backendTaskBuilder\src\TaskBoard.Domain\bin\Debug\net7.0\TaskBoard.Domain.dll
+e:\TaskBuilderBackend\backendTaskBuilder\src\TaskBoard.Domain\bin\Debug\net7.0\TaskBoard.Domain.pdb
+e:\TaskBuilderBackend\backendTaskBuilder\src\TaskBoard.Domain\obj\Debug\net7.0\TaskBoard.Domain.GeneratedMSBuildEditorConfig.editorconfig
+e:\TaskBuilderBackend\backendTaskBuilder\src\TaskBoard.Domain\obj\Debug\net7.0\TaskBoard.Domain.AssemblyInfoInputs.cache
+e:\TaskBuilderBackend\backendTaskBuilder\src\TaskBoard.Domain\obj\Debug\net7.0\TaskBoard.Domain.AssemblyInfo.cs
+e:\TaskBuilderBackend\backendTaskBuilder\src\TaskBoard.Domain\obj\Debug\net7.0\TaskBoard.Domain.csproj.CoreCompileInputs.cache
+e:\TaskBuilderBackend\backendTaskBuilder\src\TaskBoard.Domain\obj\Debug\net7.0\TaskBoard.Domain.sourcelink.json
+e:\TaskBuilderBackend\backendTaskBuilder\src\TaskBoard.Domain\obj\Debug\net7.0\TaskBoard.Domain.dll
+e:\TaskBuilderBackend\backendTaskBuilder\src\TaskBoard.Domain\obj\Debug\net7.0\refint\TaskBoard.Domain.dll
+e:\TaskBuilderBackend\backendTaskBuilder\src\TaskBoard.Domain\obj\Debug\net7.0\TaskBoard.Domain.pdb
+e:\TaskBuilderBackend\backendTaskBuilder\src\TaskBoard.Domain\obj\Debug\net7.0\ref\TaskBoard.Domain.dll

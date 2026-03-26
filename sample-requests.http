@@ -1,0 +1,138 @@
+### TaskBoard API Sample Requests
+### Save this file as sample-requests.http in VS Code with REST Client extension
+
+@baseUrl = https://localhost:7000
+@contentType = application/json
+
+### Create a new task
+POST {{baseUrl}}/api/taskitems
+Content-Type: {{contentType}}
+
+{
+  "title": "Complete API Documentation",
+  "description": "Write comprehensive documentation for the TaskBoard API",
+  "priority": "High"
+}
+
+### Get all tasks (no filtering)
+GET {{baseUrl}}/api/taskitems
+
+### Get tasks with status filter
+GET {{baseUrl}}/api/taskitems?status=Todo
+
+### Get tasks with pagination
+GET {{baseUrl}}/api/taskitems?page=1&pageSize=5
+
+### Get tasks with status filter and pagination
+GET {{baseUrl}}/api/taskitems?status=InProgress&page=1&pageSize=10
+
+### Get a specific task (replace 1 with actual task ID)
+GET {{baseUrl}}/api/taskitems/1
+
+### Update a task (replace 1 with actual task ID and RowVersion)
+PUT {{baseUrl}}/api/taskitems/1
+Content-Type: {{contentType}}
+If-Match: "AAAAAAAAB9s="
+
+{
+  "title": "Updated Task Title",
+  "description": "This is the updated description",
+  "priority": "Medium"
+}
+
+### Update task status only (replace 1 with actual task ID and RowVersion)
+PATCH {{baseUrl}}/api/taskitems/1/status
+Content-Type: {{contentType}}
+If-Match: "AAAAAAAAB9s="
+
+{
+  "status": "InProgress"
+}
+
+### Invalid status transition (should return error)
+PATCH {{baseUrl}}/api/taskitems/1/status
+Content-Type: {{contentType}}
+If-Match: "AAAAAAAAB9s="
+
+{
+  "status": "Done"
+}
+
+### Create multiple tasks for testing
+POST {{baseUrl}}/api/taskitems
+Content-Type: {{contentType}}
+
+{
+  "title": "Design Database Schema",
+  "description": "Create the database schema for the TaskBoard application",
+  "priority": "High"
+}
+
+###
+
+POST {{baseUrl}}/api/taskitems
+Content-Type: {{contentType}}
+
+{
+  "title": "Implement Authentication",
+  "description": "Add user authentication and authorization",
+  "priority": "Medium"
+}
+
+###
+
+POST {{baseUrl}}/api/taskitems
+Content-Type: {{contentType}}
+
+{
+  "title": "Write Unit Tests",
+  "description": "Create comprehensive unit tests for all services",
+  "priority": "Low"
+}
+
+### Soft delete a task (replace 1 with actual task ID)
+DELETE {{baseUrl}}/api/taskitems/1
+
+### Try to get a deleted task (should return 404)
+GET {{baseUrl}}/api/taskitems/1
+
+### Test concurrency - simulate concurrent update
+# 1. Get the task to get current RowVersion
+GET {{baseUrl}}/api/taskitems/2
+
+# 2. Update with wrong RowVersion (should return 412)
+PUT {{baseUrl}}/api/taskitems/2
+Content-Type: {{contentType}}
+If-Match: "WrongRowVersionValue"
+
+{
+  "title": "This should fail due to concurrency",
+  "description": "Testing concurrency handling",
+  "priority": "High"
+}
+
+### Test validation errors
+POST {{baseUrl}}/api/taskitems
+Content-Type: {{contentType}}
+
+{
+  "title": "",
+  "description": "Title is required, this should fail",
+  "priority": "InvalidPriority"
+}
+
+### Test invalid pagination parameters
+GET {{baseUrl}}/api/taskitems?page=0&pageSize=1000
+
+### Test non-existent task
+GET {{baseUrl}}/api/taskitems/99999
+
+### Test update non-existent task
+PUT {{baseUrl}}/api/taskitems/99999
+Content-Type: {{contentType}}
+If-Match: "AAAAAAAAB9s="
+
+{
+  "title": "This task doesn't exist",
+  "priority": "Low"
+}
